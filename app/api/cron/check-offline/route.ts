@@ -3,9 +3,10 @@ import { db, messaging } from "@/lib/firebaseAdmin";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
 
   const now = Date.now();
   const OFFLINE_THRESHOLD_MS = 90 * 1000; // 90 Seconds
