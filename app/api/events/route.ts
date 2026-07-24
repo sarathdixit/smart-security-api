@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
       try {
         await messaging.send({
-          topic: 'temple_owners',
+          topic: `device_${deviceId}`,
           android: androidPayload,
           data: dataPayload,
         });

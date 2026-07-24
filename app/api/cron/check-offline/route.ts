@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
         // Send single FCM notification to global temple_owners topic
         await messaging.send({
-          topic: "temple_owners",
+          topic: `device_${doc.id}`,
           android: androidPayload,
           data: dataPayload,
         });
