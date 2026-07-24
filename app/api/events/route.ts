@@ -70,18 +70,11 @@ export async function POST(request: Request) {
       };
 
       try {
-        await Promise.allSettled([
-          messaging.send({
-            topic: `device_${deviceId}`,
-            android: androidPayload,
-            data: dataPayload,
-          }),
-          messaging.send({
-            topic: 'temple_owners',
-            android: androidPayload,
-            data: dataPayload,
-          }),
-        ]);
+        await messaging.send({
+          topic: 'temple_owners',
+          android: androidPayload,
+          data: dataPayload,
+        });
         notificationSent = true;
       } catch (fcmErr) {
         console.error('FCM Dispatch Error in Events API:', fcmErr);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebaseAdmin";
+import { db, messaging } from "@/lib/firebaseAdmin";
 
 // GET /api/alarm/arm - Retrieve current Armed/Disarmed status of security system
 export async function GET(request: Request) {
@@ -95,6 +95,32 @@ export async function POST(request: Request) {
       acknowledgedByName: userIdentifier,
       acknowledgedAt: now.toISOString(),
     });
+
+    // 3. Dispatch Informational FCM Notification (fullScreen="false")
+    const androidPayload = {
+      priority: 'high' as const,
+      ttl: 0,
+    };
+
+    const dataPayload = {
+      type: alarmType,
+      deviceId: String(deviceId),
+      logId: logRef.id,
+      title: targetArmedState ? "🟢 Security System Armed" : "🔴 Security System Disarmed",
+      message: logMessage,
+      fullScreen: "false",
+      timestamp: String(Math.floor(now.getTime() / 1000)),
+    };
+
+    try {
+      await messaging.send({
+        topic: "temple_owners",
+        android: androidPayload,
+        data: dataPayload,
+      });
+    } catch (fcmErr) {
+      console.error("FCM Dispatch Error in Arm Status API:", fcmErr);
+    }
 
     return NextResponse.json(
       {

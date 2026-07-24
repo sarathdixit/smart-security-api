@@ -31,16 +31,25 @@ export async function GET(request: Request) {
           timestamp: new Date(),
         });
 
-        // Send FCM notification
+        const androidPayload = {
+          priority: 'high' as const,
+          ttl: 0,
+        };
+
+        const dataPayload = {
+          type: "DEVICE_OFFLINE",
+          deviceId: doc.id,
+          title: "📡 Temple Device Offline",
+          message: "No heartbeat received for over 90 seconds.",
+          fullScreen: "true",
+          timestamp: String(Math.floor(now / 1000)),
+        };
+
+        // Send single FCM notification to global temple_owners topic
         await messaging.send({
           topic: "temple_owners",
-          data: {
-            type: "DEVICE_OFFLINE",
-            deviceId: doc.id,
-            title: "📡 Temple Device Offline",
-            message: "No heartbeat received for over 90 seconds.",
-            timestamp: String(Math.floor(now / 1000)),
-          },
+          android: androidPayload,
+          data: dataPayload,
         });
       }
     }
