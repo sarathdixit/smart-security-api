@@ -37,22 +37,60 @@ export async function POST(request: Request) {
       );
     }
 
-    const acknowledgedByName = userName || userEmail || null;
+    const acknowledgedByName = userName || userEmail || "Security Admin";
     const acknowledgedByUid = userUid || null;
     const acknowledgedAt = new Date().toISOString();
 
-    // 3. Mark as acknowledged in Firestore
-    await logRef.update({
-      acknowledged: true,
-      acknowledgedByUid: acknowledgedByUid,
-      acknowledgedByName: acknowledgedByName,
-      acknowledgedAt: acknowledgedAt,
+    // 3. Atomically check and update using a Firestore transaction (First-Wins race condition protection)
+    let alreadyAcknowledged = false;
+    let winnerName: string | null = null;
+    let winnerAt: string | null = null;
+
+    await db.runTransaction(async (transaction) => {
+      const doc = await transaction.get(logRef);
+      if (!doc.exists) {
+        throw new Error(`logId '${logId}' does not exist in Firestore for deviceId '${deviceId}'.`);
+      }
+
+      const data = doc.data();
+
+      // If ALREADY acknowledged by someone else, DO NOT overwrite!
+      if (data?.acknowledged === true) {
+        alreadyAcknowledged = true;
+        winnerName = data.acknowledgedByName;
+        winnerAt = data.acknowledgedAt;
+        return;
+      }
+
+      // First person to disarm -> Lock in their acknowledgement!
+      transaction.update(logRef, {
+        acknowledged: true,
+        acknowledgedByUid: acknowledgedByUid,
+        acknowledgedByName: acknowledgedByName,
+        acknowledgedAt: acknowledgedAt,
+      });
     });
+
+    if (alreadyAcknowledged) {
+      return NextResponse.json(
+        {
+          success: true,
+          alreadyAcknowledged: true,
+          message: `Alarm was already acknowledged by ${winnerName || 'another user'}.`,
+          acknowledgedByName: winnerName,
+          acknowledgedAt: winnerAt,
+        },
+        { status: 200 }
+      );
+    }
 
     return NextResponse.json(
       {
         success: true,
+        alreadyAcknowledged: false,
         message: "Alarm acknowledged successfully.",
+        acknowledgedByName: acknowledgedByName,
+        acknowledgedAt: acknowledgedAt,
       },
       { status: 200 }
     );
