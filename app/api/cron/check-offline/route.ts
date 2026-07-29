@@ -39,9 +39,9 @@ export async function GET(request: Request) {
         const dataPayload = {
           type: "DEVICE_OFFLINE",
           deviceId: doc.id,
-          title: "📡 Temple Device Offline",
+          title: "📡 Security Device Offline",
           message: "No heartbeat received for over 90 seconds.",
-          fullScreen: "true",
+          fullScreen: "false",
           timestamp: String(Math.floor(now / 1000)),
         };
 

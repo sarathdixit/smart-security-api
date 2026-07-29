@@ -86,6 +86,7 @@ export async function GET(request: Request) {
         acknowledged: Boolean(data.acknowledged),
         acknowledgedByUid: data.acknowledgedByUid ?? null,
         acknowledgedByName: data.acknowledgedByName ?? null,
+        acknowledgedByPhoto: data.acknowledgedByPhoto ?? null,
         acknowledgedAt: formatIso(data.acknowledgedAt),
         timestamp: formatIso(data.timestamp),
       };

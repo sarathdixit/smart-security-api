@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { deviceId = "TEMPLE001", userUid, userName, userEmail } = body;
+    const { deviceId = "TEMPLE001", userUid, userName, userEmail, userPhoto } = body;
 
     const deviceRef = db.collection("devices").doc(deviceId);
     const doc = await deviceRef.get();
@@ -73,6 +73,7 @@ export async function POST(request: Request) {
         updatedAt: now,
         updatedByUid: userUid || null,
         updatedByName: userIdentifier,
+        updatedByPhoto: userPhoto || null,
       },
       { merge: true }
     );
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
       acknowledged: true,
       acknowledgedByUid: userUid || null,
       acknowledgedByName: userIdentifier,
+      acknowledgedByPhoto: userPhoto || null,
       acknowledgedAt: now.toISOString(),
     });
 

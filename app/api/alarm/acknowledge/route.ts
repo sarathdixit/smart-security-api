@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { deviceId, logId, userUid, userName, userEmail } = body;
+    const { deviceId, logId, userUid, userName, userEmail, userPhoto } = body;
 
     // 1. Validate mandatory fields
     if (!deviceId || !logId) {
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
 
     const acknowledgedByName = userName || userEmail || "Security Admin";
     const acknowledgedByUid = userUid || null;
+    const acknowledgedByPhoto = userPhoto || null;
     const acknowledgedAt = new Date().toISOString();
 
     // 3. Atomically check and update using a Firestore transaction (First-Wins race condition protection)
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
         acknowledged: true,
         acknowledgedByUid: acknowledgedByUid,
         acknowledgedByName: acknowledgedByName,
+        acknowledgedByPhoto: acknowledgedByPhoto,
         acknowledgedAt: acknowledgedAt,
       });
     });
