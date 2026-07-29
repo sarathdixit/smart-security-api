@@ -63,7 +63,7 @@ export async function POST(request: Request) {
         type: 'GATE_TOUCH',
         deviceId: String(deviceId),
         logId: logRef.id,
-        title: '🚨 Temple Gate Touched!',
+        title: '🚨 Intrusion / Movement Detected!',
         message: eventMessage,
         fullScreen: 'true',
         timestamp: String(Math.floor(Date.now() / 1000)),
